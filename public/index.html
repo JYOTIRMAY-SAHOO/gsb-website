@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>G.S.B Bricks & G.S.T Tiles</title>
+    <style>
+        body { font-family: Arial; margin:0; background:#f4f4f4; }
+        header { background:#b22222; color:white; padding:20px; text-align:center; }
+        nav { background:#333; padding:10px; text-align:center; }
+        nav a { color:white; margin:15px; text-decoration:none; }
+        .container { padding:40px; max-width:1000px; margin:auto; }
+        .card { background:white; padding:20px; margin-bottom:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+        input, select { padding:10px; margin:5px; width:220px; }
+        button { padding:10px 20px; background:#b22222; color:white; border:none; cursor:pointer; }
+        button:hover { background:#8b1a1a; }
+        footer { background:#222; color:white; text-align:center; padding:20px; }
+        .price-display { font-weight:bold; color:green; margin-top:10px; }
+        img { width:100%; max-width:300px; margin-top:10px; border-radius:8px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Gouri Shanker Bricks (G.S.B)</h1>
+    <p>Gouri Shanker Tiles (G.S.T)</p>
+    <p>Near Station Road, Markona, Balasore</p>
+</header>
+
+<nav>
+    <a href="/">Home</a>
+    <a href="/admin.html">Admin</a>
+</nav>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Our Products</h2>
+        <ul>
+            <li>Fly Ash Bricks – 9 x 5 x 3 inches</li>
+            <li>Fly Ash Bricks – 10 x 5 x 3 inches</li>
+            <li>Paver Blocks – 60mm</li>
+            <li>Paver Blocks – 80mm</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>Place Order</h2>
+
+        <form id="orderForm">
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="text" id="phone" placeholder="Phone" required>
+
+            <select id="product">
+                <option value="flyAsh9x5x3">Brick 9x5x3</option>
+                <option value="flyAsh10x5x3">Brick 10x5x3</option>
+                <option value="paver60mm">Paver Block 60mm</option>
+                <option value="paver80mm">Paver Block 80mm</option>
+            </select>
+
+            <input type="number" id="quantity" placeholder="Quantity" required>
+
+            <div id="unitInfo"></div>
+            <div class="price-display" id="totalPrice">Total Price: ₹0</div>
+
+            <img id="productImage" src="" alt="Product Image">
+
+            <br><br>
+            <button type="submit">Submit Order</button>
+        </form>
+    </div>
+
+</div>
+
+<footer>
+    <p>Contact: +917978998570 | +917008220838</p>
+</footer>
+
+<script>
+let prices = {};
+
+async function loadPrices() {
+    const res = await fetch("/api/prices");
+    prices = await res.json();
+}
+
+document.getElementById("quantity").addEventListener("input", calculateTotal);
+document.getElementById("product").addEventListener("change", updateProduct);
+
+function updateProduct() {
+    const product = document.getElementById("product").value;
+
+    if (prices[product]) {
+        document.getElementById("unitInfo").innerText =
+            "Price: ₹" + prices[product].price + " " + prices[product].unit;
+    }
+
+    // Image Preview
+  const imageMap = {
+    flyAsh9x5x3: "/brick.jpg",
+    flyAsh10x5x3: "/brick.jpg",
+    paver60mm: "/paver.jpg",
+    paver80mm: "/paver.jpg"
+};
+
+    document.getElementById("productImage").src = imageMap[product];
+
+    calculateTotal();
+}
+
+function calculateTotal() {
+    const product = document.getElementById("product").value;
+    const quantity = document.getElementById("quantity").value;
+
+    if (prices[product]) {
+        const total = prices[product].price * quantity;
+        document.getElementById("totalPrice").innerText =
+            "Total Price: ₹" + total;
+    }
+}
+
+document.getElementById("orderForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const phone = document.getElementById("phone").value;
+    const product = document.getElementById("product").value;
+    const quantity = document.getElementById("quantity").value;
+
+    const response = await fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, product, quantity })
+    });
+
+    const text = await response.text();
+    alert(text);
+
+    const message = `New Order:%0AName: ${name}%0APhone: ${phone}%0AProduct: ${product}%0AQuantity: ${quantity}`;
+    
+    const whatsappNumber = "917978998570";
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+    window.open(whatsappURL, "_blank");
+});
+
+loadPrices();
+updateProduct();
+</script>
+
+</body>
+</html>

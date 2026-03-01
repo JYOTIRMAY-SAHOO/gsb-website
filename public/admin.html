@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel - GSB</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 40px;
+            background: #f4f4f4;
+        }
+        h1 {
+            color: #b22222;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #b22222;
+            color: white;
+        }
+        button {
+            padding: 6px 10px;
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .revenue {
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Admin Dashboard - G.S.B</h1>
+<button onclick="logout()" style="float:right; background:black; color:white; padding:8px 12px;">Logout</button>
+<div class="revenue" id="totalRevenue">Total Revenue: ₹0</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="ordersTable"></tbody>
+</table>
+
+<script>
+if (!localStorage.getItem("adminLoggedIn")) {
+    window.location.href = "/login.html";
+}
+async function loadOrders() {
+    const res = await fetch("/api/orders");
+    const orders = await res.json();
+
+    const priceRes = await fetch("/api/prices");
+    const prices = await priceRes.json();
+
+    const table = document.getElementById("ordersTable");
+    table.innerHTML = "";
+
+    let revenue = 0;
+
+    orders.forEach((order) => {
+
+        let total = 0;
+
+        if (prices[order.product]) {
+            const price = prices[order.product].price;
+            total = price * parseInt(order.quantity || 0);
+            revenue += total;
+        }
+
+        table.innerHTML += `
+            <tr>
+                <td>${order.id || "-"}</td>
+                <td>${order.name || ""}</td>
+                <td>${order.phone || ""}</td>
+                <td>${order.product || ""}</td>
+                <td>${order.quantity || ""}</td>
+                <td>₹${total}</td>
+                <td>${order.date || ""}</td>
+                <td>
+                    ${order.id ? `<button onclick="deleteOrder(${order.id})">Delete</button>` : ""}
+                </td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("totalRevenue").innerText =
+        "Total Revenue: ₹" + revenue;
+}
+
+async function deleteOrder(id) {
+    const response = await fetch("/api/delete-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+    });
+
+    const text = await response.text();
+    alert(text);
+    loadOrders();
+}
+
+loadOrders();
+function logout() {
+    localStorage.removeItem("adminLoggedIn");
+    window.location.href = "/login.html";
+}
+</script>
+
+</body>
+</html>
