@@ -39,7 +39,7 @@
     <img src="brick.jpg" alt="Bricks">
     <h3>Fly Ash Bricks</h3>
     <p>9x5x3 & 10x5x3 sizes available</p>
-    <p><strong>Price: ₹7 per brick</strong></p>
+    <p><strong>Price: ₹<span id="brickPrice"></span> per brick</strong></p>
     <button onclick="orderWhatsApp('Fly Ash Bricks')">Order on WhatsApp</button>
 </div>
 
@@ -47,7 +47,7 @@
     <img src="paver.jpg" alt="Paver">
     <h3>Paver Blocks</h3>
     <p>Strong & Durable Designs</p>
-    <p><strong>Price: ₹35 per block</strong></p>
+    <p><strong>Price: ₹<span id="paverPrice"></span> per block</strong></p>
     <button onclick="orderWhatsApp('Paver Blocks')">Order on WhatsApp</button>
 </div>
     </div>
@@ -171,6 +171,20 @@ function sendToWhatsApp(name, phone, product, quantity, price) {
 }
 loadPrices();
 updateProduct();
+async function loadCardPrices() {
+    const res = await fetch("/api/prices?nocache=" + new Date().getTime());
+    const prices = await res.json();
+
+    if (prices.flyAsh9x5x3) {
+        document.getElementById("brickPrice").innerText = prices.flyAsh9x5x3.price;
+    }
+
+    if (prices.paver60mm) {
+        document.getElementById("paverPrice").innerText = prices.paver60mm.price;
+    }
+}
+
+loadCardPrices();
 </script>
 
 </body>
