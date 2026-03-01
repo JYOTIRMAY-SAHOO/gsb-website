@@ -40,7 +40,7 @@
     <h3>Fly Ash Bricks</h3>
     <p>9x5x3 & 10x5x3 sizes available</p>
     <p><strong>Price: ₹<span id="brickPrice"></span> per brick</strong></p>
-    <button onclick="orderWhatsApp('Fly Ash Bricks')">Order on WhatsApp</button>
+    <a href="https://wa.me/917978998570?text=Hello%20I%20want%20to%20order%20Fly%20Ash%20Bricks%20from%20GSB" target="_blank">
 </div>
 
         <div class="card">
@@ -48,7 +48,9 @@
     <h3>Paver Blocks</h3>
     <p>Strong & Durable Designs</p>
     <p><strong>Price: ₹<span id="paverPrice"></span> per block</strong></p>
-    <button onclick="orderWhatsApp('Paver Blocks')">Order on WhatsApp</button>
+    <a href="https://wa.me/917978998570?text=Hello%20I%20want%20to%20order%20Fly%20Ash%20Bricks%20from%20GSB" target="_blank">
+  <button>Order on WhatsApp</button>
+</a>
 </div>
     </div>
 </div>
@@ -183,9 +185,15 @@ async function loadCardPrices() {
         document.getElementById("paverPrice").innerText = prices.paver60mm.price;
     }
 }
-
 loadCardPrices();
-</script>
 
+function orderWhatsApp(product) {
+    var phoneNumber = "919876543210";
+    var message = "Hello, I want to order " + product + " from GSB.";
+    var url = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(message);
+    window.open(url, "_blank");
+}
+
+</script>
 </body>
 </html>
