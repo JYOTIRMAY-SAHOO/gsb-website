@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>G.S.B Bricks & G.S.T Tiles</title>
     <style>
         body { font-family: Arial; margin:0; background:#f4f4f4; }
@@ -35,16 +36,20 @@
 
     <div class="products">
         <div class="card">
-            <img src="brick.jpg" alt="Bricks">
-            <h3>Fly Ash Bricks</h3>
-            <p>9x5x3 & 10x5x3 sizes available</p>
-        </div>
+    <img src="brick.jpg" alt="Bricks">
+    <h3>Fly Ash Bricks</h3>
+    <p>9x5x3 & 10x5x3 sizes available</p>
+    <p><strong>Price: ₹7 per brick</strong></p>
+    <button onclick="orderWhatsApp('Fly Ash Bricks')">Order on WhatsApp</button>
+</div>
 
         <div class="card">
-            <img src="paver.jpg" alt="Paver">
-            <h3>Paver Blocks</h3>
-            <p>Strong & Durable Designs</p>
-        </div>
+    <img src="paver.jpg" alt="Paver">
+    <h3>Paver Blocks</h3>
+    <p>Strong & Durable Designs</p>
+    <p><strong>Price: ₹35 per block</strong></p>
+    <button onclick="orderWhatsApp('Paver Blocks')">Order on WhatsApp</button>
+</div>
     </div>
 </div>
 
@@ -147,7 +152,12 @@ document.getElementById("orderForm").addEventListener("submit", async function(e
 
     window.open(whatsappURL, "_blank");
 });
-
+function orderWhatsApp(product) {
+    const phone = "917978998570";  // your WhatsApp number
+    const message = "Hello, I want to order " + product + " from G.S.B Bricks.";
+    const url = "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
+    window.open(url, "_blank");
+}
 loadPrices();
 updateProduct();
 </script>
