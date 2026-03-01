@@ -144,6 +144,7 @@ document.getElementById("orderForm").addEventListener("submit", async function(e
 
     const text = await response.text();
     alert(text);
+    sendToWhatsApp(name, phone, product, quantity, totalPrice);
 
     const message = `New Order:%0AName: ${name}%0APhone: ${phone}%0AProduct: ${product}%0AQuantity: ${quantity}`;
     
@@ -152,10 +153,20 @@ document.getElementById("orderForm").addEventListener("submit", async function(e
 
     window.open(whatsappURL, "_blank");
 });
-function orderWhatsApp(product) {
-    const phone = "917978998570";  // your WhatsApp number
-    const message = "Hello, I want to order " + product + " from G.S.B Bricks.";
-    const url = "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
+function sendToWhatsApp(name, phone, product, quantity, price) {
+
+    const whatsappNumber = "917978998570"; // your number
+
+    const message =
+        "🧱 *New Order - GSB Bricks* %0A%0A" +
+        "👤 Name: " + name + "%0A" +
+        "📞 Phone: " + phone + "%0A" +
+        "📦 Product: " + product + "%0A" +
+        "🔢 Quantity: " + quantity + "%0A" +
+        "💰 Total: ₹" + price;
+
+    const url = "https://wa.me/" + whatsappNumber + "?text=" + message;
+
     window.open(url, "_blank");
 }
 loadPrices();

@@ -31,7 +31,7 @@ app.post("/api/order", (req, res) => {
 orders.push({
     id: Date.now(),
     ...req.body,
-    date: new Date().toLocaleString()
+   date: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString().replace('T', ' ').substring(0, 19)
 });
         fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
 

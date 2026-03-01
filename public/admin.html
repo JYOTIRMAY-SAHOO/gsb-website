@@ -95,8 +95,12 @@ async function loadOrders() {
                 <td>${order.product || ""}</td>
                 <td>${order.quantity || ""}</td>
                 <td>₹${total}</td>
-                <td>${order.date || ""}</td>
                 <td>
+${new Date(order.date).toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour12: true
+})}
+</td>
                     ${order.id ? `<button onclick="deleteOrder(${order.id})">Delete</button>` : ""}
                 </td>
             </tr>

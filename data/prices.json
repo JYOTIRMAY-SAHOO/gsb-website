@@ -1,6 +1,6 @@
 {
-  "flyAsh9x5x3": { "price": 6, "unit": "per brick" },
-  "flyAsh10x5x3": { "price": 7, "unit": "per brick" },
-  "paver60mm": { "price": 35, "unit": "per sq ft" },
-  "paver80mm": { "price": 45, "unit": "per sq ft" }
+  "flyAsh9x5x3": { "price": 6.4, "unit": "per brick" },
+  "flyAsh10x5x3": { "price": 6.8, "unit": "per brick" },
+  "paver60mm": { "price": 30, "unit": "per sq ft" },
+  "paver80mm": { "price": 35, "unit": "per sq ft" }
 }
