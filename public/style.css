@@ -1,8 +1,67 @@
-body{margin:0;font-family:Arial;background:#f4f4f4}
-header{background:#b30000;color:white;padding:20px;text-align:center}
-nav{background:#111;padding:10px;text-align:center}
-nav a{color:white;margin:0 15px;text-decoration:none}
-section{padding:40px;text-align:center}
-.card{background:white;padding:20px;margin:20px auto;width:300px;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,0.2)}
-button{padding:10px 20px;background:#b30000;color:white;border:none;border-radius:5px}
-input,select{padding:8px;margin:8px;width:80%}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+}
+
+header {
+    background: #b22222;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+nav {
+    background: #333;
+    padding: 10px;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: #ffd700;
+}
+
+.container {
+    padding: 30px;
+    text-align: center;
+}
+
+.products {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+    width: 280px;
+}
+
+.card img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+button {
+    background: #b22222;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background: #8b0000;
+}
