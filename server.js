@@ -80,7 +80,13 @@ app.post("/api/login", async (req, res) => {
             return res.json({ message: "Invalid email or password" });
         }
 
-        res.json({ message: "Login successful", user });
+        const safeUser = {
+            id: user._id,
+            name: user.name,
+            email: user.email
+        };
+
+        res.json({ message: "Login successful", user: safeUser });
 
     } catch (error) {
         res.status(500).json({ message: "Error logging in" });
