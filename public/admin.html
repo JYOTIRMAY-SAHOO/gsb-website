@@ -37,23 +37,28 @@
             font-size: 18px;
             font-weight: bold;
         }
+        .logout-btn {
+            float: right;
+            background: black;
+            color: white;
+            padding: 8px 12px;
+        }
     </style>
 </head>
 <body>
 
 <h1>Admin Dashboard - G.S.B</h1>
-<button onclick="logout()" style="float:right; background:black; color:white; padding:8px 12px;">Logout</button>
+<button class="logout-btn" onclick="logout()">Logout</button>
+
 <div class="revenue" id="totalRevenue">Total Revenue: ₹0</div>
 
 <table>
     <thead>
         <tr>
             <th>Order ID</th>
-            <th>Name</th>
-            <th>Phone</th>
+            <th>User Email</th>
             <th>Product</th>
-            <th>Quantity</th>
-            <th>Total</th>
+            <th>Price</th>
             <th>Date</th>
             <th>Action</th>
         </tr>
@@ -62,53 +67,50 @@
 </table>
 
 <script>
+
 if (!localStorage.getItem("adminLoggedIn")) {
     window.location.href = "/login.html";
 }
+
 async function loadOrders() {
-    const res = await fetch("/api/orders");
-    const orders = await res.json();
+    try {
+        const res = await fetch("/api/orders");
+        const orders = await res.json();
 
-    const priceRes = await fetch("/api/prices");
-    const prices = await priceRes.json();
+        const table = document.getElementById("ordersTable");
+        table.innerHTML = "";
 
-    const table = document.getElementById("ordersTable");
-    table.innerHTML = "";
+        let revenue = 0;
 
-    let revenue = 0;
+        orders.forEach((order) => {
 
-    orders.forEach((order) => {
+            revenue += Number(order.price || 0);
 
-        let total = 0;
+            table.innerHTML += `
+                <tr>
+                    <td>${order._id}</td>
+                    <td>${order.userEmail || ""}</td>
+                    <td>${order.product || ""}</td>
+                    <td>₹${order.price || 0}</td>
+                    <td>
+                        ${new Date(order.date).toLocaleString("en-IN", {
+                            timeZone: "Asia/Kolkata",
+                            hour12: true
+                        })}
+                    </td>
+                    <td>
+                        <button onclick="deleteOrder('${order._id}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
 
-        if (prices[order.product]) {
-            const price = prices[order.product].price;
-            total = price * parseInt(order.quantity || 0);
-            revenue += total;
-        }
+        document.getElementById("totalRevenue").innerText =
+            "Total Revenue: ₹" + revenue;
 
-        table.innerHTML += `
-            <tr>
-                <td>${order.id || "-"}</td>
-                <td>${order.name || ""}</td>
-                <td>${order.phone || ""}</td>
-                <td>${order.product || ""}</td>
-                <td>${order.quantity || ""}</td>
-                <td>₹${total}</td>
-                <td>
-${new Date(order.date).toLocaleString("en-IN", {
-    timeZone: "Asia/Kolkata",
-    hour12: true
-})}
-</td>
-                    ${order.id ? `<button onclick="deleteOrder(${order.id})">Delete</button>` : ""}
-                </td>
-            </tr>
-        `;
-    });
-
-    document.getElementById("totalRevenue").innerText =
-        "Total Revenue: ₹" + revenue;
+    } catch (error) {
+        console.error("Error loading orders:", error);
+    }
 }
 
 async function deleteOrder(id) {
@@ -123,11 +125,13 @@ async function deleteOrder(id) {
     loadOrders();
 }
 
-loadOrders();
 function logout() {
     localStorage.removeItem("adminLoggedIn");
     window.location.href = "/login.html";
 }
+
+loadOrders();
+
 </script>
 
 </body>
