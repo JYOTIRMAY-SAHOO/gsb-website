@@ -3,13 +3,49 @@ const mongoose = require("mongoose");
 mongoose.connect("mongodb+srv://gsbadmin:gsb12345@gsb.lecitgo.mongodb.net/gsb?retryWrites=true&w=majority")
 .then(() => console.log("MongoDB Connected"))
 .catch((err) => console.log(err));
+const userSchema = new mongoose.Schema({
+    name: String,
+    email: String,
+    password: String
+});
+const orderSchema = new mongoose.Schema({
+    userEmail: String,
+    product: String,
+    price: Number,
+    date: { type: Date, default: Date.now }
+});
+
+const Order = mongoose.model("Order", orderSchema);
+const User = mongoose.model("User", userSchema);
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const app = express();
 
 app.use(bodyParser.json());
 app.use(express.static("public"));
+app.post("/api/register", async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
 
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.json({ message: "User already exists" });
+        }
+
+        const newUser = new User({
+            name,
+            email,
+            password
+        });
+
+        await newUser.save();
+
+        res.json({ message: "Registration successful" });
+
+    } catch (error) {
+        res.status(500).json({ message: "Error registering user" });
+    }
+});
 const ordersFile = "./data/orders.json";
 const priceFile = "./data/prices.json";
 
