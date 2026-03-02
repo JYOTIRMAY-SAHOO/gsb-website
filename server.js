@@ -1,13 +1,32 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const fs = require("fs");
+
+const app = express();
+
+/* ========================
+   MIDDLEWARE
+======================== */
+app.use(bodyParser.json());
+app.use(express.static("public"));
+
+/* ========================
+   MONGODB CONNECTION
+======================== */
 mongoose.connect("mongodb+srv://gsbadmin:gsb12345@gsb.lecitgo.mongodb.net/gsb?retryWrites=true&w=majority")
 .then(() => console.log("MongoDB Connected"))
-.catch((err) => console.log(err));
+.catch(err => console.log("MongoDB Error:", err));
+
+/* ========================
+   SCHEMAS
+======================== */
 const userSchema = new mongoose.Schema({
     name: String,
     email: String,
     password: String
 });
+
 const orderSchema = new mongoose.Schema({
     userEmail: String,
     product: String,
@@ -15,14 +34,21 @@ const orderSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
 });
 
-const Order = mongoose.model("Order", orderSchema);
+/* ========================
+   MODELS
+======================== */
 const User = mongoose.model("User", userSchema);
-const bodyParser = require("body-parser");
-const fs = require("fs");
-const app = express();
+const Order = mongoose.model("Order", orderSchema);
 
-app.use(bodyParser.json());
-app.use(express.static("public"));
+/* ========================
+   FILE PATHS
+======================== */
+const ordersFile = "./data/orders.json";
+const priceFile = "./data/prices.json";
+
+/* ========================
+   REGISTER API
+======================== */
 app.post("/api/register", async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -32,12 +58,7 @@ app.post("/api/register", async (req, res) => {
             return res.json({ message: "User already exists" });
         }
 
-        const newUser = new User({
-            name,
-            email,
-            password
-        });
-
+        const newUser = new User({ name, email, password });
         await newUser.save();
 
         res.json({ message: "Registration successful" });
@@ -46,63 +67,83 @@ app.post("/api/register", async (req, res) => {
         res.status(500).json({ message: "Error registering user" });
     }
 });
-const ordersFile = "./data/orders.json";
-const priceFile = "./data/prices.json";
 
+/* ========================
+   LOGIN API
+======================== */
+app.post("/api/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ email, password });
+        if (!user) {
+            return res.json({ message: "Invalid email or password" });
+        }
+
+        res.json({ message: "Login successful", user });
+
+    } catch (error) {
+        res.status(500).json({ message: "Error logging in" });
+    }
+});
+
+/* ========================
+   GET PRICES
+======================== */
 app.get("/api/prices", (req, res) => {
     const data = fs.readFileSync(priceFile);
     res.json(JSON.parse(data));
 });
 
+/* ========================
+   UPDATE PRICE
+======================== */
 app.post("/api/update-price", (req, res) => {
-    fs.writeFileSync(priceFile, JSON.stringify(req.body));
+    fs.writeFileSync(priceFile, JSON.stringify(req.body, null, 2));
     res.send("Price Updated");
 });
 
-app.post("/api/order", (req, res) => {
+/* ========================
+   SAVE ORDER
+======================== */
+app.post("/api/order", async (req, res) => {
     try {
-        let orders = [];
-
-        if (fs.existsSync(ordersFile)) {
-            const data = fs.readFileSync(ordersFile, "utf8");
-            orders = data ? JSON.parse(data) : [];
-        }
-
-orders.push({
-    id: Date.now(),
-    ...req.body,
-   date: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString().replace('T', ' ').substring(0, 19)
-});
-        fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
-
+        const newOrder = new Order(req.body);
+        await newOrder.save();
         res.send("Order Saved Successfully");
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
         res.status(500).send("Server Error");
     }
 });
 
-app.get("/api/orders", (req, res) => {
-    const orders = fs.readFileSync(ordersFile);
-    res.json(JSON.parse(orders));
-});
-app.post("/api/delete-order", (req, res) => {
+/* ========================
+   GET ALL ORDERS
+======================== */
+app.get("/api/orders", async (req, res) => {
     try {
-        const id = parseInt(req.body.id);
+        const orders = await Order.find();
+        res.json(orders);
+    } catch (err) {
+        res.status(500).send("Server Error");
+    }
+});
 
-        let orders = JSON.parse(fs.readFileSync(ordersFile, "utf8"));
-
-        const updatedOrders = orders.filter(order => order.id !== id);
-
-        fs.writeFileSync(ordersFile, JSON.stringify(updatedOrders, null, 2));
-
+/* ========================
+   DELETE ORDER
+======================== */
+app.post("/api/delete-order", async (req, res) => {
+    try {
+        await Order.findByIdAndDelete(req.body.id);
         res.send("Order Deleted Successfully");
     } catch (err) {
-        console.error(err);
         res.status(500).send("Delete Failed");
     }
 });
-const PORT = process.env.PORT || 3000;
+
+/* ========================
+   START SERVER
+======================== */
+const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
