@@ -1,4 +1,8 @@
 const express = require("express");
+const mongoose = require("mongoose");
+mongoose.connect("mongodb+srv://gsbadmin:Welcomesgb2026@gsb.lecitgo.mongodb.net/gsb?retryWrites=true&w=majority")
+.then(() => console.log("MongoDB Connected"))
+.catch((err) => console.log(err));
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const app = express();
