@@ -1,7 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -26,7 +25,7 @@ const userSchema = new mongoose.Schema({
     name: String,
     email: String,
     password: String,
-    role: { type: String, default: "user" } // user or admin
+    role: { type: String, default: "user" }
 });
 
 const orderSchema = new mongoose.Schema({
@@ -58,8 +57,6 @@ function verifyToken(req, res, next) {
 /* ========================
    REGISTER
 ======================== */
-const bcrypt = require("bcryptjs");
-
 app.post("/api/register", async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -69,13 +66,13 @@ app.post("/api/register", async (req, res) => {
             return res.json({ message: "User already exists" });
         }
 
-        // 🔐 Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = new User({
             name,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            role: "user"
         });
 
         await newUser.save();
@@ -86,6 +83,7 @@ app.post("/api/register", async (req, res) => {
         res.status(500).json({ message: "Error registering user" });
     }
 });
+
 /* ========================
    LOGIN
 ======================== */
@@ -98,14 +96,23 @@ app.post("/api/login", async (req, res) => {
             return res.json({ message: "Invalid email or password" });
         }
 
-        // 🔐 Compare hashed password
         const isMatch = await bcrypt.compare(password, user.password);
-
         if (!isMatch) {
             return res.json({ message: "Invalid email or password" });
         }
 
-        res.json({ message: "Login successful", user });
+        const token = jwt.sign(
+            { id: user._id, role: user.role, email: user.email },
+            JWT_SECRET,
+            { expiresIn: "2h" }
+        );
+
+        res.json({
+            message: "Login successful",
+            token,
+            role: user.role,
+            name: user.name
+        });
 
     } catch (error) {
         res.status(500).json({ message: "Error logging in" });
@@ -116,14 +123,19 @@ app.post("/api/login", async (req, res) => {
    CREATE ORDER (Protected)
 ======================== */
 app.post("/api/order", verifyToken, async (req, res) => {
-    const newOrder = new Order({
-        userEmail: req.user.email,
-        product: req.body.product,
-        price: req.body.price
-    });
+    try {
+        const newOrder = new Order({
+            userEmail: req.user.email,
+            product: req.body.product,
+            price: req.body.price
+        });
 
-    await newOrder.save();
-    res.json({ message: "Order saved" });
+        await newOrder.save();
+        res.json({ message: "Order saved" });
+
+    } catch (error) {
+        res.status(500).json({ message: "Error saving order" });
+    }
 });
 
 /* ========================
