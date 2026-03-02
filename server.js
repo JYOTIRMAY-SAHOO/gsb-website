@@ -2,14 +2,15 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const fs = require("fs");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 
-/* ========================
-   MIDDLEWARE
-======================== */
 app.use(bodyParser.json());
 app.use(express.static("public"));
+
+const JWT_SECRET = "gsb_super_secret_key_2026";
 
 /* ========================
    MONGODB CONNECTION
@@ -24,7 +25,8 @@ mongoose.connect("mongodb+srv://gsbadmin:gsb12345@gsb.lecitgo.mongodb.net/gsb?re
 const userSchema = new mongoose.Schema({
     name: String,
     email: String,
-    password: String
+    password: String,
+    role: { type: String, default: "user" } // user or admin
 });
 
 const orderSchema = new mongoose.Schema({
@@ -34,116 +36,109 @@ const orderSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
 });
 
-/* ========================
-   MODELS
-======================== */
 const User = mongoose.model("User", userSchema);
 const Order = mongoose.model("Order", orderSchema);
 
 /* ========================
-   FILE PATHS
+   AUTH MIDDLEWARE
 ======================== */
-const ordersFile = "./data/orders.json";
-const priceFile = "./data/prices.json";
+function verifyToken(req, res, next) {
+    const token = req.headers["authorization"];
+    if (!token) return res.status(403).json({ message: "Access Denied" });
+
+    try {
+        const verified = jwt.verify(token, JWT_SECRET);
+        req.user = verified;
+        next();
+    } catch (err) {
+        res.status(400).json({ message: "Invalid Token" });
+    }
+}
 
 /* ========================
-   REGISTER API
+   REGISTER
 ======================== */
 app.post("/api/register", async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
+    const { name, email, password } = req.body;
 
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.json({ message: "User already exists" });
-        }
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.json({ message: "User already exists" });
 
-        const newUser = new User({ name, email, password });
-        await newUser.save();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        res.json({ message: "Registration successful" });
+    const newUser = new User({
+        name,
+        email,
+        password: hashedPassword,
+        role: "user"
+    });
 
-    } catch (error) {
-        res.status(500).json({ message: "Error registering user" });
-    }
+    await newUser.save();
+    res.json({ message: "Registration successful" });
 });
 
 /* ========================
-   LOGIN API
+   LOGIN
 ======================== */
 app.post("/api/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
+    const { email, password } = req.body;
 
-        const user = await User.findOne({ email, password });
-        if (!user) {
-            return res.json({ message: "Invalid email or password" });
-        }
+    const user = await User.findOne({ email });
+    if (!user) return res.json({ message: "Invalid email or password" });
 
-        const safeUser = {
-            id: user._id,
-            name: user.name,
-            email: user.email
-        };
+    const validPass = await bcrypt.compare(password, user.password);
+    if (!validPass) return res.json({ message: "Invalid email or password" });
 
-        res.json({ message: "Login successful", user: safeUser });
+    const token = jwt.sign(
+        { id: user._id, role: user.role, email: user.email },
+        JWT_SECRET,
+        { expiresIn: "2h" }
+    );
 
-    } catch (error) {
-        res.status(500).json({ message: "Error logging in" });
+    res.json({
+        message: "Login successful",
+        token,
+        role: user.role,
+        name: user.name
+    });
+});
+
+/* ========================
+   CREATE ORDER (Protected)
+======================== */
+app.post("/api/order", verifyToken, async (req, res) => {
+    const newOrder = new Order({
+        userEmail: req.user.email,
+        product: req.body.product,
+        price: req.body.price
+    });
+
+    await newOrder.save();
+    res.json({ message: "Order saved" });
+});
+
+/* ========================
+   GET ALL ORDERS (Admin Only)
+======================== */
+app.get("/api/orders", verifyToken, async (req, res) => {
+    if (req.user.role !== "admin") {
+        return res.status(403).json({ message: "Admin only" });
     }
+
+    const orders = await Order.find();
+    res.json(orders);
 });
 
 /* ========================
-   GET PRICES
+   DELETE ORDER (Admin Only)
 ======================== */
-app.get("/api/prices", (req, res) => {
-    const data = fs.readFileSync(priceFile);
-    res.json(JSON.parse(data));
-});
-
-/* ========================
-   UPDATE PRICE
-======================== */
-app.post("/api/update-price", (req, res) => {
-    fs.writeFileSync(priceFile, JSON.stringify(req.body, null, 2));
-    res.send("Price Updated");
-});
-
-/* ========================
-   SAVE ORDER
-======================== */
-app.post("/api/order", async (req, res) => {
-    try {
-        const newOrder = new Order(req.body);
-        await newOrder.save();
-        res.send("Order Saved Successfully");
-    } catch (err) {
-        res.status(500).send("Server Error");
+app.post("/api/delete-order", verifyToken, async (req, res) => {
+    if (req.user.role !== "admin") {
+        return res.status(403).json({ message: "Admin only" });
     }
-});
 
-/* ========================
-   GET ALL ORDERS
-======================== */
-app.get("/api/orders", async (req, res) => {
-    try {
-        const orders = await Order.find();
-        res.json(orders);
-    } catch (err) {
-        res.status(500).send("Server Error");
-    }
-});
-
-/* ========================
-   DELETE ORDER
-======================== */
-app.post("/api/delete-order", async (req, res) => {
-    try {
-        await Order.findByIdAndDelete(req.body.id);
-        res.send("Order Deleted Successfully");
-    } catch (err) {
-        res.status(500).send("Delete Failed");
-    }
+    await Order.findByIdAndDelete(req.body.id);
+    res.json({ message: "Order deleted" });
 });
 
 /* ========================
