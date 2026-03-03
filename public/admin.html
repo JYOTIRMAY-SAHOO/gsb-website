@@ -74,7 +74,13 @@ if (!localStorage.getItem("adminLoggedIn")) {
 
 async function loadOrders() {
     try {
-        const res = await fetch("/api/orders");
+        const token = localStorage.getItem("token");
+
+const res = await fetch("/api/orders", {
+    headers: {
+        "authorization": token
+    }
+});
         const orders = await res.json();
 
         const table = document.getElementById("ordersTable");
@@ -114,11 +120,16 @@ async function loadOrders() {
 }
 
 async function deleteOrder(id) {
-    const response = await fetch("/api/delete-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id })
-    });
+    const token = localStorage.getItem("token");
+
+fetch("/api/delete-order", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "authorization": token
+    },
+    body: JSON.stringify({ id })
+});
 
     const text = await response.text();
     alert(text);
