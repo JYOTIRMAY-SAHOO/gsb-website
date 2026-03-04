@@ -184,7 +184,28 @@ Total Price: ₹0
 </div>
 
 </div>
+<div class="card">
 
+<h2>Tractor Load Calculator</h2>
+
+<select id="tractorType">
+<option value="small">Small Tractor</option>
+<option value="medium">Medium Tractor</option>
+<option value="big">Big Tractor</option>
+</select>
+
+<select id="brickType">
+<option value="9">Brick 9x5x3</option>
+<option value="10">Brick 10x5x3</option>
+</select>
+
+<br><br>
+
+<button onclick="calculateLoad()">Calculate Load</button>
+
+<h3 id="loadResult"></h3>
+
+</div>
 <footer style="background:#222;color:white;text-align:center;padding:20px">
 
 Contact: +917978998570
@@ -370,7 +391,29 @@ document.getElementById("paverPrice").innerText=prices.paver60mm.price
 }
 
 loadCardPrices()
+function calculateLoad(){
 
+const tractor=document.getElementById("tractorType").value
+const brick=document.getElementById("brickType").value
+
+let bricks=0
+
+if(tractor==="small"){
+bricks=(brick==="9")?800:700
+}
+
+if(tractor==="medium"){
+bricks=(brick==="9")?1200:1000
+}
+
+if(tractor==="big"){
+bricks=(brick==="9")?1600:1400
+}
+
+document.getElementById("loadResult").innerText=
+"Estimated Capacity: "+bricks+" bricks"
+
+}
 </script>
 
 </body>
