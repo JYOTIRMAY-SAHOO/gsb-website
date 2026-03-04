@@ -264,6 +264,35 @@ Total Price: ₹0
 <p>Approximate calculation for single brick wall.</p>
 
 </div>
+<div class="card">
+
+<h2>Project Cost Estimator</h2>
+
+<label>Wall Length (ft)</label><br>
+<input type="number" id="projWallLength">
+
+<br><br>
+
+<label>Wall Height (ft)</label><br>
+<input type="number" id="projWallHeight">
+
+<br><br>
+
+<label>Road / Floor Length (ft)</label><br>
+<input type="number" id="projRoadLength">
+
+<br><br>
+
+<label>Road / Floor Width (ft)</label><br>
+<input type="number" id="projRoadWidth">
+
+<br><br>
+
+<button onclick="estimateProject()">Estimate Project</button>
+
+<h3 id="projectResult"></h3>
+
+</div>
 <footer style="background:#222;color:white;text-align:center;padding:20px">
 
 Contact: +917978998570
@@ -521,6 +550,43 @@ const bricks=Math.ceil(area*factor)
 
 document.getElementById("brickResult").innerText=
 "Wall Area: "+area+" sq ft | Required Bricks: "+bricks
+
+}
+async function estimateProject(){
+
+const wallLength=document.getElementById("projWallLength").value
+const wallHeight=document.getElementById("projWallHeight").value
+const roadLength=document.getElementById("projRoadLength").value
+const roadWidth=document.getElementById("projRoadWidth").value
+
+if(!wallLength || !wallHeight || !roadLength || !roadWidth){
+alert("Please enter all values")
+return
+}
+
+const wallArea=wallLength*wallHeight
+const roadArea=roadLength*roadWidth
+
+const bricks=Math.ceil(wallArea*55)
+const pavers=Math.ceil(roadArea*4)
+
+const res=await fetch("/api/prices")
+const prices=await res.json()
+
+const brickPrice=prices.flyAsh9x5x3.price
+const paverPrice=prices.paver60mm.price
+
+const brickCost=bricks*brickPrice
+const paverCost=pavers*paverPrice
+
+const totalCost=brickCost+paverCost
+
+document.getElementById("projectResult").innerHTML=
+"Wall Area: "+wallArea+" sq ft<br>"+
+"Bricks Needed: "+bricks+"<br>"+
+"Paver Area: "+roadArea+" sq ft<br>"+
+"Paver Blocks: "+pavers+"<br>"+
+"Estimated Cost: ₹"+totalCost
 
 }
 </script>
