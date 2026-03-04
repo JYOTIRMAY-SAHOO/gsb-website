@@ -7,11 +7,16 @@
 
 <h2>Your Orders</h2>
 
+<input type="date" id="filterDate">
+<button onclick="filter()">Filter</button>
+
 <div id="orders"></div>
 
 <script>
 
-async function loadOrders(){
+let allOrders=[];
+
+async function load(){
 
 const token=localStorage.getItem("token");
 
@@ -19,21 +24,44 @@ const res=await fetch("/api/orders",{
 headers:{authorization:token}
 });
 
-const orders=await res.json();
+allOrders=await res.json();
+show(allOrders);
+
+}
+
+function show(list){
 
 const div=document.getElementById("orders");
+div.innerHTML="";
 
-orders.forEach(o=>{
+list.forEach(o=>{
 div.innerHTML+=`
 <p>
-${o.product} | ₹${o.price} | ${new Date(o.date).toLocaleString()}
+${o.product} | ${o.quantity} | ₹${o.price}
+<br>
+${new Date(o.date).toLocaleString()}
 </p>
+<hr>
 `;
 });
 
 }
 
-loadOrders();
+function filter(){
+
+const d=document.getElementById("filterDate").value;
+
+const filtered=allOrders.filter(o=>{
+
+return new Date(o.date)<=new Date(d);
+
+});
+
+show(filtered);
+
+}
+
+load();
 
 </script>
 

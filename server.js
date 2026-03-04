@@ -1,26 +1,21 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(express.static("public"));
 
-const JWT_SECRET = "gsb_super_secret_key";
+const JWT_SECRET = "gsb_secret_key";
 
-/* ========================
-   MONGODB CONNECTION
-======================== */
+/* MongoDB */
 mongoose.connect("mongodb+srv://gsbadmin:gsb12345@gsb.lecitgo.mongodb.net/gsb?retryWrites=true&w=majority")
-.then(()=>console.log("MongoDB Connected"))
+.then(()=>console.log("MongoDB connected"))
 .catch(err=>console.log(err));
 
-/* ========================
-   SCHEMAS
-======================== */
+/* Schemas */
 
 const userSchema = new mongoose.Schema({
 name:String,
@@ -36,15 +31,15 @@ phone:String,
 product:String,
 quantity:Number,
 price:Number,
+service:String,
+address:String,
 date:{type:Date,default:Date.now}
 });
 
 const User = mongoose.model("User",userSchema);
 const Order = mongoose.model("Order",orderSchema);
 
-/* ========================
-   AUTH MIDDLEWARE
-======================== */
+/* Middleware */
 
 function verifyToken(req,res,next){
 const token=req.headers["authorization"];
@@ -53,21 +48,19 @@ try{
 const verified=jwt.verify(token,JWT_SECRET);
 req.user=verified;
 next();
-}catch(err){
+}catch{
 res.status(400).json({message:"Invalid token"});
 }
 }
 
-/* ========================
-   REGISTER
-======================== */
+/* Register */
 
 app.post("/api/register",async(req,res)=>{
 
 const {name,email,password}=req.body;
 
-const existing=await User.findOne({email});
-if(existing) return res.json({message:"User already exists"});
+const exist=await User.findOne({email});
+if(exist) return res.json({message:"User exists"});
 
 const hashed=await bcrypt.hash(password,10);
 
@@ -82,9 +75,7 @@ await user.save();
 res.json({message:"Account created"});
 });
 
-/* ========================
-   LOGIN
-======================== */
+/* Login */
 
 app.post("/api/login",async(req,res)=>{
 
@@ -111,22 +102,18 @@ user
 
 });
 
-/* ========================
-   GET PRICES
-======================== */
+/* Prices */
 
 app.get("/api/prices",(req,res)=>{
 const prices=JSON.parse(fs.readFileSync("data/prices.json"));
 res.json(prices);
 });
 
-/* ========================
-   CREATE ORDER
-======================== */
+/* Create order */
 
 app.post("/api/order",verifyToken,async(req,res)=>{
 
-const {name,phone,product,quantity,price}=req.body;
+const {name,phone,product,quantity,price,service,address}=req.body;
 
 const order=new Order({
 userEmail:req.user.email,
@@ -134,7 +121,9 @@ name,
 phone,
 product,
 quantity,
-price
+price,
+service,
+address
 });
 
 await order.save();
@@ -142,9 +131,7 @@ await order.save();
 res.json({message:"Order saved"});
 });
 
-/* ========================
-   GET ORDERS
-======================== */
+/* Get orders */
 
 app.get("/api/orders",verifyToken,async(req,res)=>{
 
@@ -158,9 +145,7 @@ res.json(orders);
 
 });
 
-/* ========================
-   DELETE ORDER
-======================== */
+/* Delete */
 
 app.post("/api/delete-order",verifyToken,async(req,res)=>{
 
@@ -175,6 +160,4 @@ res.json({message:"Order deleted"});
 
 const PORT=process.env.PORT||10000;
 
-app.listen(PORT,()=>{
-console.log("Server running on port "+PORT);
-});
+app.listen(PORT,()=>console.log("Server running"));
