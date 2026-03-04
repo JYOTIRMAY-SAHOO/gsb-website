@@ -215,6 +215,27 @@ Total Price: ₹0
 <h3 id="loadResult"></h3>
 
 </div>
+<div class="card">
+
+<h2>Paver Area Calculator</h2>
+
+<label>Length (feet)</label><br>
+<input type="number" id="length" placeholder="Enter Length">
+
+<br><br>
+
+<label>Width (feet)</label><br>
+<input type="number" id="width" placeholder="Enter Width">
+
+<br><br>
+
+<button onclick="calculatePaver()">Calculate Paver Blocks</button>
+
+<h3 id="paverResult"></h3>
+
+<p>Approximation based on standard 60mm paver blocks.</p>
+
+</div>
 <footer style="background:#222;color:white;text-align:center;padding:20px">
 
 Contact: +917978998570
@@ -434,6 +455,25 @@ document.getElementById("quantity").value=qty
 calculateTotal()
 
 }
+
+}
+function calculatePaver(){
+
+const length=document.getElementById("length").value
+const width=document.getElementById("width").value
+
+if(!length || !width){
+alert("Enter length and width")
+return
+}
+
+const area=length*width
+
+// approx 4 pavers per sq ft
+const blocks=Math.ceil(area*4)
+
+document.getElementById("paverResult").innerText=
+"Area: "+area+" sq ft | Required Pavers: "+blocks
 
 }
 </script>
