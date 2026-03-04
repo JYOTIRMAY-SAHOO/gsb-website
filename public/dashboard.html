@@ -1,52 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Customer Dashboard</title>
+<title>Customer Dashboard</title>
 </head>
 <body>
 
-<h2>Welcome</h2>
-<button onclick="logout()">Logout</button>
+<h2>Your Orders</h2>
 
-<h3>Your Orders</h3>
 <div id="orders"></div>
 
 <script>
-const user = JSON.parse(localStorage.getItem("user"));
 
-if (!user) {
-    window.location.href = "login.html";
-}
+async function loadOrders(){
 
-document.querySelector("h2").innerText = "Welcome " + user.name;
+const token=localStorage.getItem("token");
 
-async function loadOrders() {
-    const response = await fetch("/api/orders");
-    const orders = await response.json();
+const res=await fetch("/api/orders",{
+headers:{authorization:token}
+});
 
-    const userOrders = orders.filter(order => order.userEmail === user.email);
+const orders=await res.json();
 
-    const container = document.getElementById("orders");
-    container.innerHTML = "";
+const div=document.getElementById("orders");
 
-    userOrders.forEach(order => {
-        container.innerHTML += `
-            <p>
-                ${order.product} - ₹${order.price}
-                <br/>
-                Date: ${new Date(order.date).toLocaleString()}
-            </p>
-            <hr/>
-        `;
-    });
-}
+orders.forEach(o=>{
+div.innerHTML+=`
+<p>
+${o.product} | ₹${o.price} | ${new Date(o.date).toLocaleString()}
+</p>
+`;
+});
 
-function logout() {
-    localStorage.removeItem("user");
-    window.location.href = "login.html";
 }
 
 loadOrders();
+
 </script>
 
 </body>

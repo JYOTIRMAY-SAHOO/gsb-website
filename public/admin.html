@@ -1,144 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Panel - GSB</title>
-    <style>
-        body {
-            font-family: Arial;
-            padding: 40px;
-            background: #f4f4f4;
-        }
-        h1 {
-            color: #b22222;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        th {
-            background: #b22222;
-            color: white;
-        }
-        button {
-            padding: 6px 10px;
-            background: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .revenue {
-            margin: 20px 0;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .logout-btn {
-            float: right;
-            background: black;
-            color: white;
-            padding: 8px 12px;
-        }
-    </style>
+<title>Admin Dashboard</title>
 </head>
 <body>
 
-<h1>Admin Dashboard - G.S.B</h1>
-<button class="logout-btn" onclick="logout()">Logout</button>
+<h2>Admin Dashboard</h2>
 
-<div class="revenue" id="totalRevenue">Total Revenue: ₹0</div>
-
-<table>
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>User Email</th>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Date</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody id="ordersTable"></tbody>
-</table>
+<div id="orders"></div>
 
 <script>
 
-if (!localStorage.getItem("adminLoggedIn")) {
-    window.location.href = "/login.html";
-}
+async function loadOrders(){
 
-async function loadOrders() {
-    try {
-        const token = localStorage.getItem("token");
+const token=localStorage.getItem("token");
 
-const res = await fetch("/api/orders", {
-    headers: {
-        "authorization": token
-    }
-});
-        const orders = await res.json();
-
-        const table = document.getElementById("ordersTable");
-        table.innerHTML = "";
-
-        let revenue = 0;
-
-        orders.forEach((order) => {
-
-            revenue += Number(order.price || 0);
-
-            table.innerHTML += `
-                <tr>
-                    <td>${order._id}</td>
-                    <td>${order.userEmail || ""}</td>
-                    <td>${order.product || ""}</td>
-                    <td>₹${order.price || 0}</td>
-                    <td>
-                        ${new Date(order.date).toLocaleString("en-IN", {
-                            timeZone: "Asia/Kolkata",
-                            hour12: true
-                        })}
-                    </td>
-                    <td>
-                        <button onclick="deleteOrder('${order._id}')">Delete</button>
-                    </td>
-                </tr>
-            `;
-        });
-
-        document.getElementById("totalRevenue").innerText =
-            "Total Revenue: ₹" + revenue;
-
-    } catch (error) {
-        console.error("Error loading orders:", error);
-    }
-}
-
-async function deleteOrder(id) {
-    const token = localStorage.getItem("token");
-
-fetch("/api/delete-order", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-        "authorization": token
-    },
-    body: JSON.stringify({ id })
+const res=await fetch("/api/orders",{
+headers:{authorization:token}
 });
 
-    const text = await response.text();
-    alert(text);
-    loadOrders();
+const orders=await res.json();
+
+const div=document.getElementById("orders");
+
+orders.forEach(o=>{
+div.innerHTML+=`
+<p>
+${o.name} | ${o.product} | ₹${o.price}
+<button onclick="del('${o._id}')">Delete</button>
+</p>
+`;
+});
+
 }
 
-function logout() {
-    localStorage.removeItem("adminLoggedIn");
-    window.location.href = "/login.html";
+async function del(id){
+
+const token=localStorage.getItem("token");
+
+await fetch("/api/delete-order",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+authorization:token
+},
+body:JSON.stringify({id})
+});
+
+location.reload();
+
 }
 
 loadOrders();
