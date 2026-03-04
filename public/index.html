@@ -148,7 +148,16 @@ border-radius:8px;
 </select>
 
 <input type="number" id="quantity" placeholder="Quantity" required>
+<br><br>
 
+<label>Select Tractor Load</label><br>
+
+<select id="tractorOrder" onchange="fillTractorQuantity()">
+<option value="">-- Select Tractor --</option>
+<option value="800">Small Tractor (800 bricks)</option>
+<option value="1200">Medium Tractor (1200 bricks)</option>
+<option value="1600">Big Tractor (1600 bricks)</option>
+</select>
 <br><br>
 
 <select id="serviceType" onchange="toggleDelivery()">
@@ -412,6 +421,19 @@ bricks=(brick==="9")?1600:1400
 
 document.getElementById("loadResult").innerText=
 "Estimated Capacity: "+bricks+" bricks"
+
+}
+function fillTractorQuantity(){
+
+const qty=document.getElementById("tractorOrder").value
+
+if(qty){
+
+document.getElementById("quantity").value=qty
+
+calculateTotal()
+
+}
 
 }
 </script>
