@@ -293,6 +293,32 @@ Total Price: ₹0
 <h3 id="projectResult"></h3>
 
 </div>
+<div class="card">
+
+<h2>Quick Tractor Order</h2>
+
+<label>Select Brick Type</label><br>
+
+<select id="quickBrick">
+<option value="9x5x3">Brick 9x5x3</option>
+<option value="10x5x3">Brick 10x5x3</option>
+</select>
+
+<br><br>
+
+<label>Select Tractor</label><br>
+
+<select id="quickTractor">
+<option value="800">Small Tractor (800 bricks)</option>
+<option value="1200">Medium Tractor (1200 bricks)</option>
+<option value="1600">Big Tractor (1600 bricks)</option>
+</select>
+
+<br><br>
+
+<button onclick="quickOrder()">Order on WhatsApp</button>
+
+</div>
 <footer style="background:#222;color:white;text-align:center;padding:20px">
 
 Contact: +917978998570
@@ -587,6 +613,24 @@ document.getElementById("projectResult").innerHTML=
 "Paver Area: "+roadArea+" sq ft<br>"+
 "Paver Blocks: "+pavers+"<br>"+
 "Estimated Cost: ₹"+totalCost
+
+}
+function quickOrder(){
+
+const brick=document.getElementById("quickBrick").value
+const qty=document.getElementById("quickTractor").value
+
+const message=
+"Hello GSB Bricks,%0A"+
+"I want to order:%0A"+
+"Brick Size: "+brick+"%0A"+
+"Quantity: "+qty+" bricks (1 Tractor)%0A"
+
+const phone="917978998570"
+
+const url="https://wa.me/"+phone+"?text="+message
+
+window.open(url,"_blank")
 
 }
 </script>
