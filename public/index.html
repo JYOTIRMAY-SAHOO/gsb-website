@@ -236,6 +236,34 @@ Total Price: ₹0
 <p>Approximation based on standard 60mm paver blocks.</p>
 
 </div>
+<div class="card">
+
+<h2>Brick Wall Calculator</h2>
+
+<label>Wall Length (feet)</label><br>
+<input type="number" id="wallLength" placeholder="Enter Length">
+
+<br><br>
+
+<label>Wall Height (feet)</label><br>
+<input type="number" id="wallHeight" placeholder="Enter Height">
+
+<br><br>
+
+<select id="brickSize">
+<option value="55">Brick 9x5x3</option>
+<option value="50">Brick 10x5x3</option>
+</select>
+
+<br><br>
+
+<button onclick="calculateBricks()">Calculate Bricks</button>
+
+<h3 id="brickResult"></h3>
+
+<p>Approximate calculation for single brick wall.</p>
+
+</div>
 <footer style="background:#222;color:white;text-align:center;padding:20px">
 
 Contact: +917978998570
@@ -474,6 +502,25 @@ const blocks=Math.ceil(area*4)
 
 document.getElementById("paverResult").innerText=
 "Area: "+area+" sq ft | Required Pavers: "+blocks
+
+}
+function calculateBricks(){
+
+const length=document.getElementById("wallLength").value
+const height=document.getElementById("wallHeight").value
+const factor=document.getElementById("brickSize").value
+
+if(!length || !height){
+alert("Enter wall size")
+return
+}
+
+const area=length*height
+
+const bricks=Math.ceil(area*factor)
+
+document.getElementById("brickResult").innerText=
+"Wall Area: "+area+" sq ft | Required Bricks: "+bricks
 
 }
 </script>
