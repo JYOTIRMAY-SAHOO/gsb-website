@@ -116,15 +116,67 @@ max-width:300px;
 margin-top:10px;
 border-radius:8px;
 }
+.hero{
+background-image:url("brick.jpg");
+background-size:cover;
+background-position:center;
+color:white;
+text-align:center;
+padding:120px 20px;
+position:relative;
+}
 
+.hero h1{
+font-size:48px;
+margin-bottom:10px;
+}
+
+.hero p{
+font-size:20px;
+margin-bottom:20px;
+}
+
+.hero button{
+font-size:18px;
+padding:14px 28px;
+background:#ff6600;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.hero button:hover{
+background:#cc5200;
+}
+
+.hero::before{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.55);
+}
+
+.hero *{
+position:relative;
+}
 </style>
 </head>
 
 <body>
 
-<header>
+<header class="hero">
+
 <h1>Gouri Shanker Bricks (G.S.B)</h1>
-<p>Premium Fly Ash Bricks & Paver Blocks</p>
+
+<p>Premium Fly Ash Bricks & Paver Blocks Manufacturer in Odisha</p>
+
+<a href="#orderForm">
+<button>Order Bricks Now</button>
+</a>
+
 </header>
 
 <nav>
